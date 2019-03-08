@@ -19,6 +19,7 @@ class ProductPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         AddressTag('Australia'),
+        SizedBox(width: 5.0,),
         PriceTag(price.toString()),
       ],
     );
