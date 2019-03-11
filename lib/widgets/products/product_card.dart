@@ -1,49 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import './price_tag.dart';
 import '../ui_elements/title_default.dart';
 import './address_tag.dart';
+import '../../models/product.dart';
+import '../../scoped-models/main.dart';
 
 class ProductCard extends StatelessWidget {
-  final Map<String, dynamic> product;
+  final Product product;
   final int productIndex;
 
   ProductCard(this.product, this.productIndex);
 
-  Widget _buildTitlePriceRow () {
+  Widget _buildTitlePriceRow() {
     return Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TitleDefault(product['title']),
-                SizedBox(
-                  width: 10,
-                ),
-                PriceTag(product['price'].toString()),
-              ],
-            ),
-            padding: EdgeInsets.only(top: 10.0),
-          );
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          TitleDefault(product.title),
+          SizedBox(
+            width: 10,
+          ),
+          PriceTag(product.price.toString()),
+        ],
+      ),
+      padding: EdgeInsets.only(top: 10.0),
+    );
   }
 
   Widget _buildActionButtons(BuildContext context) {
     return ButtonBar(
-            alignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.info),
-                  tooltip: 'Details',
-                  color: Theme.of(context).accentColor,
-                  onPressed: () => Navigator.pushNamed<bool>(
-                      context, '/product/' + productIndex.toString())),
-              IconButton(
-                icon: Icon(Icons.favorite),
-                tooltip: 'Favorite',
-                onPressed: () {},
-                color: Colors.redAccent,
-              )
-            ],
-          );
+      alignment: MainAxisAlignment.center,
+      children: <Widget>[
+        IconButton(
+            icon: Icon(Icons.info),
+            tooltip: 'Details',
+            color: Theme.of(context).accentColor,
+            onPressed: () => Navigator.pushNamed<bool>(
+                context, '/product/' + productIndex.toString())),
+        ScopedModelDescendant<MainModel>(
+          builder: (BuildContext context, Widget child, MainModel model) {
+            return IconButton(
+              icon: model.allProducts[productIndex].isFavorite
+                  ? Icon(Icons.favorite)
+                  : Icon(Icons.favorite_border),
+              tooltip: 'Favorite',
+              onPressed: () {
+                model.selectProduct(productIndex);
+                model.toggleProductFavoriteStatus();
+              },
+              color: Colors.redAccent,
+            );
+          },
+        )
+      ],
+    );
   }
 
   @override
@@ -51,9 +63,10 @@ class ProductCard extends StatelessWidget {
     return Card(
       child: Column(
         children: <Widget>[
-          Image.asset(product['image']),
+          Image.asset(product.image),
           _buildTitlePriceRow(),
           AddressTag('Austria'),
+          Text(product.userEmail),
           _buildActionButtons(context),
         ],
       ),
