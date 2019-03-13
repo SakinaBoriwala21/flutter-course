@@ -3,27 +3,31 @@ import 'package:flutter/material.dart';
 import './product_edit.dart';
 import './product_list.dart';
 import '../scoped-models/main.dart';
+import '../widgets/ui_elements/logout_list_tile.dart';
 
 class ProductsAdminPage extends StatelessWidget {
   final MainModel model;
   ProductsAdminPage(this.model);
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
-        child: Column(
-      children: <Widget>[
-        AppBar(
-          automaticallyImplyLeading: false,
-          title: Text('Choose'),
-        ),
-        ListTile(
-          leading: Icon(Icons.shop),
-          title: Text('All Products'),
-          onTap: () {
-            Navigator.pushReplacementNamed(context, '/products');
-          },
-        )
-      ],
-    ));
+      child: Column(
+        children: <Widget>[
+          AppBar(
+            automaticallyImplyLeading: false,
+            title: Text('Choose'),
+          ),
+          ListTile(
+            leading: Icon(Icons.shop),
+            title: Text('All Products'),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, '/');
+            },
+          ),
+          Divider(),
+          LogoutListTile(),
+        ],
+      ),
+    );
   }
 
   @override
