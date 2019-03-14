@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../models/product.dart';
 import '../scoped-models/main.dart';
+import '../widgets/form_inputs/image.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -16,10 +19,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
     'title': null,
     'description': null,
     'price': null,
-    'image':
-        'https://foodrevolution.org/wp-content/uploads/2018/04/blog-featured-diabetes-20180406-1330.jpg',
+    'image': null,
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _descriptionTextController = TextEditingController();
 
   Widget _buildTitleTextField(Product product) {
     return TextFormField(
@@ -37,8 +40,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _buildDescriptionTextField(Product product) {
+    if (product == null && _descriptionTextController.text.trim() == '') {
+      _descriptionTextController.text = '';
+    } else if (product != null &&
+        _descriptionTextController.text.trim() == '') {
+      _descriptionTextController.text = product.description;
+    }
     return TextFormField(
-      initialValue: product == null ? '' : product.description,
+      // initialValue: product == null ? '' : product.description,
       maxLines: 4,
       validator: (String value) {
         if (value.isEmpty || value.length < 10) {
@@ -69,39 +78,49 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
+  void _setImage(File image) {
+    _formData['image'] = image;
+  }
+
   void _submitForm(
       Function addProduct, Function updateProduct, Function setSelectedProduct,
       [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate()) {
+    if (!_formKey.currentState.validate() ||
+        (_formData['image'] == null && selectedProductIndex == -1)) {
       return;
     }
     _formKey.currentState.save();
     if (selectedProductIndex == -1) {
       addProduct(
         _formData['title'],
-        _formData['description'],
+        _descriptionTextController.text,
         _formData['image'],
         _formData['price'],
       ).then((bool success) {
-        if(success) {
-            Navigator.pushReplacementNamed(context, '/');
-            setSelectedProduct(null);
-          } else {
-            showDialog(context: context, builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Something went wrong'),
-                content: Text('Please try again'),
-                actions: <Widget>[
-                  FlatButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text('Okay'),)],);
-            });
-          }
-      } );
+        if (success) {
+          Navigator.pushReplacementNamed(context, '/');
+          setSelectedProduct(null);
+        } else {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Something went wrong'),
+                  content: Text('Please try again'),
+                  actions: <Widget>[
+                    FlatButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text('Okay'),
+                    )
+                  ],
+                );
+              });
+        }
+      });
     } else {
       updateProduct(
         _formData['title'],
-        _formData['description'],
+        _descriptionTextController.text,
         _formData['image'],
         _formData['price'],
       ).then((_) => {
@@ -130,6 +149,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
               _buildDescriptionTextField(product),
               _buildPriceTextField(product),
               SizedBox(height: 10),
+              ImageInput(_setImage, product),
               _buildSubmitButton(),
             ],
           ),
@@ -176,4 +196,3 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 }
- 
